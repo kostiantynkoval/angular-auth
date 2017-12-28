@@ -1,3 +1,44 @@
-<p>
-  sign-up-activate works!
-</p>
+<div *ngIf="isModalShown" [config]="{ show: true }" (onHidden)="onHidden()" bsModal #autoShownModal="bs-modal"
+     class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">Sign Up</h4>
+      </div>
+      <div class="modal-body">
+        <small id="emailHelp" class="form-text text-muted text-danger">Errors go here.</small>
+        <form [formGroup]="rForm" (ngSubmit)="addPost(rForm.value)">
+          <div class="form-group">
+            <label for="firstname">First Name</label>
+            <input type="text" class="form-control" formControlName="firstname" id="firstname" placeholder="Your First Name">
+          </div>
+          <div class="form-group">
+            <label for="lastname">Last Name</label>
+            <input type="text" class="form-control" formControlName="lastname" id="lastname" placeholder="Your Last Name">
+          </div>
+          <div class="form-group">
+            <label for="phonenumber">Phone Number</label>
+            <div class="input-group">
+              <div class="input-group-btn">
+                <button (click)="handleDropdown()" type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  {{phoneCode}}&nbsp;<span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" [ngClass]="{'show': isDropdownActive}">
+                  <li *ngFor="let country of phoneCodes"><a (click)="getCountryCode(country)" href="#">{{country.code}} {{country.dial_code}}</a></li>
+                </ul>
+              </div>
+              <input type="text" id="phonenumber" formControlName="phonenumber" class="form-control" aria-label="Your Phone Number">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" class="form-control" id="email" formControlName="email" placeholder="Your Email">
+          </div>
+          <button type="submit" class="btn btn-primary">Authenticate</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
