@@ -1,6 +1,7 @@
 import {BrowserModule} from '@angular/platform-browser';
-import {NgModule} from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from "@angular/forms"
+import { NgModule } from '@angular/core';
+import { HttpClientModule } from '@angular/common/http';
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 
 import {AppRoutingModule} from './app-routing.module';
 
@@ -12,6 +13,8 @@ import {SignUpActivateComponent} from './auth/sign-up-activate/sign-up-activate.
 import {SignUpEarlyAccessComponent} from './auth/sign-up-early-access/sign-up-early-access.component';
 import {SignInComponent} from './auth/sign-in/sign-in.component';
 import {NotFoundComponent} from './not-found/not-found.component';
+
+import { AuthService } from './services/auth.service';
 
 
 @NgModule({
@@ -28,9 +31,10 @@ import {NotFoundComponent} from './not-found/not-found.component';
     BrowserModule,
     AppRoutingModule,
     FormsModule,
+    HttpClientModule,
     ReactiveFormsModule
   ],
-  providers: [],
+  providers: [AuthService],
   bootstrap: [AppComponent]
 })
 export class AppModule {

@@ -1,12 +1,18 @@
-<div *ngIf="isModalShown" [config]="{ show: true }" (onHidden)="onHidden()" bsModal #autoShownModal="bs-modal"
+<!-- Sign Up Apply - Step 1 -->
+<div *ngIf="isStep1ModalShown" [config]="{ show: true }" (onStep1Hidden)="onStep1Hidden()" bsModal #autoShownStep1Modal="bs-modal"
      class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-sm">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title pull-left">Sign Up</h4>
+        <h4 class="modal-title pull-left">Sign Up - Apply</h4>
       </div>
       <div class="modal-body">
-        <small id="emailHelp" class="form-text text-muted text-danger">Errors go here.</small>
+        <small *ngIf="rForm.get('firstname').hasError('required') && rForm.get('firstname').touched" class="form-text text-muted text-danger">First Name is required<br /></small>
+        <small *ngIf="rForm.get('lastname').hasError('required') && rForm.get('lastname').touched" class="form-text text-muted text-danger">Last Name is required<br /></small>
+        <small *ngIf="rForm.get('phonenumber').hasError('required') && rForm.get('phonenumber').touched" class="form-text text-muted text-danger">Phone Number is required<br /></small>
+        <small *ngIf="!rForm.get('phonenumber').hasError('required') && rForm.get('phonenumber').hasError('pattern') && rForm.get('phonenumber').touched" class="form-text text-muted text-danger">Phone Number is not valid<br /></small>
+        <small *ngIf="rForm.get('email').hasError('required') && rForm.get('email').touched" class="form-text text-muted text-danger">Email is required<br /></small>
+        <small *ngIf="!rForm.get('email').hasError('required') && rForm.get('email').hasError('pattern') && rForm.get('email').touched" class="form-text text-muted text-danger">Email is not valid<br /></small>
         <form [formGroup]="rForm" (ngSubmit)="addPost(rForm.value)">
           <div class="form-group">
             <label for="firstname">First Name</label>
@@ -34,11 +40,97 @@
             <label for="email">Email</label>
             <input type="email" class="form-control" id="email" formControlName="email" placeholder="Your Email">
           </div>
-          <button type="submit" class="btn btn-primary">Authenticate</button>
+          <button type="submit" [disabled]="!rForm.valid" class="btn btn-primary">Authenticate</button>
         </form>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Verification Code -->
+<div *ngIf="isCodeModalShown" [config]="{ show: true }" (onCodeHidden)="onCodeHidden()" bsModal #autoShownCodeModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div id="divider" class="modal-header">
+        <h4 class="modal-title pull-left">Enter Code from SMS</h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="hideCodeModal()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form class="input-group code-group">
+          <input #digit1 type="text" name="d1" [(ngModel)]="d1" (keyup)="handleDigit($event, digit2)" maxlength="1" min="1" max="9" class="form-control code-item">
+          <input #digit2 type="text" name="d2" [(ngModel)]="d2" (keyup)="handleDigit($event, digit3)" maxlength="1" min="1" max="9" class="form-control code-item">
+          <input #digit3 type="text" name="d3" [(ngModel)]="d3" (keyup)="handleDigit($event, digit4)" maxlength="1" min="1" max="9" class="form-control code-item">
+          <input #digit4 type="text" name="d4" [(ngModel)]="d4" (keyup)="handleDigit($event, null)" maxlength="1" min="1" max="9" class="form-control code-item">
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 
+<!-- Verification Code Authenticated -->
+<div *ngIf="isSuccessModalShown" [config]="{ show: true }" (onSuccessHidden)="onSuccessHidden()" bsModal #autoShownSuccessModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">Auto shown modal</h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="hideSuccessModal()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-success" role="alert">Authentication Successful</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sign Up Apply - Add Company Name And Annual Income -->
+<div *ngIf="isIncomeModalShown" [config]="{ show: true }" (onIncomeHidden)="onIncomeHidden()" bsModal #autoShownIncomeModal="bs-modal"
+     class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">Sign Up - Apply</h4>
+      </div>
+      <div class="modal-body">
+        <small *ngIf="rForm.get('firstname').hasError('required') && rForm.get('firstname').touched" class="form-text text-muted text-danger">First Name is required<br /></small>
+        <small *ngIf="rForm.get('lastname').hasError('required') && rForm.get('lastname').touched" class="form-text text-muted text-danger">Last Name is required<br /></small>
+        <small *ngIf="rForm.get('phonenumber').hasError('required') && rForm.get('phonenumber').touched" class="form-text text-muted text-danger">Phone Number is required<br /></small>
+        <small *ngIf="!rForm.get('phonenumber').hasError('required') && rForm.get('phonenumber').hasError('pattern') && rForm.get('phonenumber').touched" class="form-text text-muted text-danger">Phone Number is not valid<br /></small>
+        <small *ngIf="rForm.get('email').hasError('required') && rForm.get('email').touched" class="form-text text-muted text-danger">Email is required<br /></small>
+        <small *ngIf="!rForm.get('email').hasError('required') && rForm.get('email').hasError('pattern') && rForm.get('email').touched" class="form-text text-muted text-danger">Email is not valid<br /></small>
+        <form [formGroup]="rForm" (ngSubmit)="addPost(rForm.value)">
+          <div class="form-group">
+            <label for="firstname">First Name</label>
+            <input type="text" class="form-control" formControlName="firstname" id="firstname" placeholder="Your First Name">
+          </div>
+          <div class="form-group">
+            <label for="lastname">Last Name</label>
+            <input type="text" class="form-control" formControlName="lastname" id="lastname" placeholder="Your Last Name">
+          </div>
+          <div class="form-group">
+            <label for="phonenumber">Phone Number</label>
+            <div class="input-group">
+              <div class="input-group-btn">
+                <button (click)="handleDropdown()" type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  {{phoneCode}}&nbsp;<span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" [ngClass]="{'show': isDropdownActive}">
+                  <li *ngFor="let country of phoneCodes"><a (click)="getCountryCode(country)" href="#">{{country.code}} {{country.dial_code}}</a></li>
+                </ul>
+              </div>
+              <input type="text" id="phonenumber" formControlName="phonenumber" class="form-control" aria-label="Your Phone Number">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" class="form-control" id="email" formControlName="email" placeholder="Your Email">
+          </div>
+          <button type="submit" [disabled]="!rForm.valid" class="btn btn-primary">Authenticate</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
