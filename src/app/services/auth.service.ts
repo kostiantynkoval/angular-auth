@@ -50,7 +50,7 @@ export class AuthService {
     );
   }
 
-  /** Verify Authentication Code sent by SMS */
+  /** Send and Verify Authentication Code sent by SMS */
   sendSMS(data) {
     return this.http.post(this.url + '/user/sendsms', data, httpOptions).pipe(
       catchError(this.handleError('send code by SMS'))
