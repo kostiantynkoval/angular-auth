@@ -179,7 +179,6 @@
 </div>
 
 
-<button type="button" class="btn btn-primary" (click)="showCardModal()">Render auto-shown modal</button>
 <!-- Sign Up Apply - Add Company Name And Annual Final -->
 <div *ngIf="isFinalModalShown" [config]="{ show: true }" (onHidden)="onFinalHidden()" bsModal #autoShownFinalModal="bs-modal"
      class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
