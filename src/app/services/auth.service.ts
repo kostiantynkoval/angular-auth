@@ -1,10 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 
-import {Observable} from 'rxjs/Observable';
-import {of} from 'rxjs/observable/of';
-import {catchError, map, tap} from 'rxjs/operators';
-
 import { User } from '../models/user/user-model';
 
 const httpOptions = {
@@ -19,7 +15,8 @@ export class AuthService {
   constructor(private http: HttpClient) {
   }
 
-  registerUser(user): Observable<User> {
+  /** POST: add a new hero to the server */
+  registerUser(user) {
     const data: User = {
       weChatId: 'string',
       profile: {
@@ -43,41 +40,20 @@ export class AuthService {
         amountUSD: null
       }
     };
-    /** POST: add a new hero to the server */
 
-    return this.http.post(this.url + '/user/register', data, httpOptions).pipe(
-      catchError(this.handleError('register User'))
-    );
+    return this.http.post(this.url + '/user/register', data, httpOptions);
   }
 
   /** Send and Verify Authentication Code sent by SMS */
   sendSMS(data) {
-    return this.http.post(this.url + '/user/sendsms', data, httpOptions).pipe(
-      catchError(this.handleError('send code by SMS'))
-    );
+    return this.http.post(this.url + '/user/sendsms', data, httpOptions);
   }
   checkCode(data) {
-    return this.http.post(this.url + '/user/confirmsms', data, httpOptions).pipe(
-      catchError(this.handleError('confirm code from SMS'))
-    );
+    return this.http.post(this.url + '/user/confirmsms', data, httpOptions);
   }
 
-  /**
-   * Handle Http operation that failed.
-   * Let the app continue.
-   * @param operation - name of the operation that failed
-   * @param result - optional value to return as the observable result
-   */
-  private handleError<T> (operation = 'operation', result?: T) {
-    return (error: any): Observable<T> => {
-
-      // TODO: send the error to remote logging infrastructure
-      console.error(error); // log to console instead
-
-      // Let the app keep running by returning an empty result.
-      return of(result as T);
-    };
+  /** Send Credit Card Credentials */
+  sendCard(data, token) {
+    return this.http.post(`${this.url}/user/addcard?token=${token}`, data, httpOptions);
   }
 }
-
-/*    addHero (hero: Hero): Observable<Hero>*/

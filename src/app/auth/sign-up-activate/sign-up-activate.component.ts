@@ -15,6 +15,7 @@ const INCOMEOPTIONSVALUES = [
   {id: 5, value: "$10M - $20M USD"},
   {id: 6, value: "$20M+ USD"}
 ];
+const currentYear = parseInt(new Date().getFullYear().toString().substr(-2));
 
 @Component({
   selector: 'app-sign-up-activate',
@@ -54,12 +55,20 @@ export class SignUpActivateComponent implements OnInit {
   billingAddress1: string;
   billingAddress2: string;
   cardNumber: string;
+  expMonth: string;
+  expYear: string;
+  cvv: string;
+  addCardResponseStatus: number;
+  addCardResponseMessage: string;
+
+  // Modal Error
+  errorMessage: string;
 
 
   constructor(private formBuilder: FormBuilder, private authService: AuthService) {
     this.phoneCodes = PHONECODES;
-    this.phoneCode = 'US +1';
-    this.phonePrefix = '+1';
+    this.phoneCode = 'UA +380';
+    this.phonePrefix = '+380';
     this.incomeOptionsValues = INCOMEOPTIONSVALUES;
     this.rForm = formBuilder.group({
       'firstname' : [null, Validators.required],
@@ -74,11 +83,11 @@ export class SignUpActivateComponent implements OnInit {
     });
     this.cForm = formBuilder.group({
       'billingAddress1' : [null, Validators.required],
-      'billingAddress2' : [null, Validators.required],
-      'cardNumber' : [null, Validators.required],
-      'expMonth' : [null, Validators.required],
-      'expYear' : [null, Validators.required],
-      'cvv' : [null, Validators.required]
+      'billingAddress2' : [null],
+      'cardNumber' : [null, Validators.compose([Validators.required, Validators.minLength(15), Validators.maxLength(16), Validators.pattern(/^[0-9]{15,16}$/)])],
+      'expMonth' : [null, Validators.compose([Validators.required, Validators.minLength(1), Validators.maxLength(2), Validators.pattern(/^[0-9]{1,2}$/), Validators.min(1), Validators.max(12)])],
+      'expYear' : [null, Validators.compose([Validators.required, Validators.minLength(1), Validators.maxLength(2), Validators.pattern(/^[0-9]{1,2}$/), Validators.min(currentYear), Validators.max(currentYear + 10)])],
+      'cvv' : [null, Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(3), Validators.pattern(/^[0-9]{3}$/)])]
     });
   }
 
@@ -96,6 +105,12 @@ export class SignUpActivateComponent implements OnInit {
 
   @ViewChild('autoShownCardModal') autoShownCardModal: ModalDirective;
   isCardModalShown: boolean = false;
+
+  @ViewChild('autoShownFinalModal') autoShownFinalModal: ModalDirective;
+  isFinalModalShown: boolean = false;
+
+  @ViewChild('autoShownErrorModal') autoShownErrorModal: ModalDirective;
+  isErrorModalShown: boolean = false;
 
   ngOnInit() {
     this.showStep1Modal();
@@ -133,11 +148,15 @@ export class SignUpActivateComponent implements OnInit {
       phoneNumber: post.phonenumber,
       phonePrefix: this.phonePrefix
     };
+    this.hideStep1Modal();
     this.authService.registerUser(user).subscribe(res => {
       this.loggedUser = res;
       console.log('USER: ', this.loggedUser);
-      this.hideStep1Modal();
       this.sendSMSwithCode();
+    }, (err) => {
+      console.log('err', err);
+      this.errorMessage = "Status: " + err.name;
+      this.showErrorModal();
     });
   }
 
@@ -152,6 +171,10 @@ export class SignUpActivateComponent implements OnInit {
     this.authService.sendSMS(data).subscribe((res) => {
       console.log('SMS Sent', res);
       this.showCodeModal();
+    }, (err) => {
+      console.log('err', err);
+      this.errorMessage = "Status: " + err.name;
+      this.showErrorModal();
     });
   }
 
@@ -198,6 +221,11 @@ export class SignUpActivateComponent implements OnInit {
       } else {
         document.getElementById('divider').style.borderBottom = '1px solid red';
       }
+    }, (err) => {
+      console.log('err', err);
+      this.errorMessage = "Status: " + err.name;
+      this.hideCodeModal();
+      this.showErrorModal();
     });
   }
 
@@ -206,7 +234,7 @@ export class SignUpActivateComponent implements OnInit {
 
   showSuccessModal(): void {
     this.isSuccessModalShown = true;
-    setTimeout(this.hideSuccessModal, 2000, this);
+    setTimeout(this.hideSuccessModal, 1300, this);
   }
 
   hideSuccessModal(that): void {
@@ -239,6 +267,8 @@ export class SignUpActivateComponent implements OnInit {
 
   addIncome(post) {
     console.log(post);
+    this.hideIncomeModal();
+    this.showCardModal();
   }
 
 
@@ -258,6 +288,61 @@ export class SignUpActivateComponent implements OnInit {
 
   addCard(post) {
     console.log(post);
+    const data = {
+      type: "AX",
+      nameOnCard: `${this.loggedUser.firstName} ${this.loggedUser.lastName}`,
+      cardNumber: post.cardNumber,
+      expirationMonth: parseInt(post.expMonth),
+      expirationYear: parseInt(`20${post.expYear}`),
+      cvv: post.cvv
+    };
+    this.authService.sendCard(data, this.loggedUser.token).subscribe((res: any) => {
+      console.log('res', res)
+      this.addCardResponseStatus = res.status;
+      this.addCardResponseMessage = res.message;
+      this.hideCardModal();
+      this.showFinalModal();
+    }, (err) => {
+      console.log('err', err);
+      if (err.error && err.error === "Your card number is incorrect.") {
+        this.addCardResponseStatus = err.status;
+        this.addCardResponseMessage = err.error;
+        this.hideCardModal();
+        this.showFinalModal();
+      } else {
+        this.errorMessage = "Status: " + err.name;
+        this.hideCardModal();
+        this.showErrorModal();
+      }
+    });
+  }
+
+  /* Functions handle Final Success Modal Window */
+
+  showFinalModal(): void {
+    this.isFinalModalShown = true;
+  }
+
+  hideFinalModal(): void {
+    this.autoShownFinalModal.hide();
+  }
+
+  onFinalHidden(): void {
+    this.isFinalModalShown = false;
+  }
+
+  /* Functions handle Error Modal Window */
+
+  showErrorModal(): void {
+    this.isErrorModalShown = true;
+  }
+
+  hideErrorModal(): void {
+    this.autoShownErrorModal.hide();
+  }
+
+  onErrorHidden(): void {
+    this.isErrorModalShown = false;
   }
 
 }

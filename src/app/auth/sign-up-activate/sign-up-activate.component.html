@@ -86,9 +86,8 @@
   </div>
 </div>
 
+
 <!-- Sign Up Apply - Add Company Name And Annual Income -->
-<button type="button" class="btn btn-primary" (click)="showCardModal()">Open a modal</button>
-<!-- TODO: Temporary button.Remove -->
 <div *ngIf="isIncomeModalShown" [config]="{ show: true }" (onHidden)="onIncomeHidden()" bsModal #autoShownIncomeModal="bs-modal"
      class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-sm">
@@ -133,11 +132,17 @@
       </div>
       <div class="modal-body">
         <small *ngIf="cForm.get('billingAddress1').hasError('required') && cForm.get('billingAddress1').touched" class="form-text text-muted text-danger">First Name is required<br /></small>
-        <small *ngIf="cForm.get('billingAddress2').hasError('required') && cForm.get('billingAddress2').touched" class="form-text text-muted text-danger">Last Name is required<br /></small>
-        <small *ngIf="cForm.get('cardNumber').hasError('required') && cForm.get('cardNumber').touched" class="form-text text-muted text-danger">Phone Number is required<br /></small>
+        <small *ngIf="cForm.get('cardNumber').hasError('required') && cForm.get('cardNumber').touched" class="form-text text-muted text-danger">Card Number is required<br /></small>
+        <small *ngIf="cForm.get('cardNumber').hasError('pattern') && cForm.get('cardNumber').touched" class="form-text text-muted text-danger">Card Number should contain 15 or 16 digits<br /></small>
+        <small *ngIf="cForm.get('expMonth').hasError('required') && cForm.get('expMonth').touched" class="form-text text-muted text-danger">Expire Month is required<br /></small>
+        <small *ngIf="cForm.get('expMonth').touched && (cForm.get('expMonth').hasError('min') || cForm.get('expMonth').hasError('max') || cForm.get('expMonth').hasError('pattern'))" class="form-text text-muted text-danger">Expire Month is not valid<br /></small>
+        <small *ngIf="cForm.get('expYear').hasError('required') && cForm.get('expYear').touched" class="form-text text-muted text-danger">Expire Year is required<br /></small>
+        <small *ngIf="cForm.get('expYear').touched && (cForm.get('expYear').hasError('min') || cForm.get('expYear').hasError('max') || cForm.get('expYear').hasError('pattern'))" class="form-text text-muted text-danger">Expire Year is not valid<br /></small>
+        <small *ngIf="cForm.get('cvv').hasError('required') && cForm.get('cvv').touched" class="form-text text-muted text-danger">CVV is required<br /></small>
+        <small *ngIf="cForm.get('cvv').hasError('pattern') && cForm.get('cvv').touched" class="form-text text-muted text-danger">CVV should contain 3 digits<br /></small>
         <form [formGroup]="cForm" (ngSubmit)="addCard(cForm.value)">
           <div class="form-group">
-            <div type="text" class="form-control" >{{firstname}} {{lastname}}</div>
+            <!--<div type="text" class="form-control" >{{loggedUser.firstName}} {{loggedUser.lastName}}</div>-->
           </div>
           <div class="form-group">
             <label for="billingAddress1">Billing Address</label>
@@ -149,21 +154,70 @@
           </div>
           <div class="form-group">
             <label for="cardNumber">Credit Card Number</label>
-            <input type="text" class="form-control" id="cardNumber" formControlName="cardNumber" placeholder="Card Number">
+            <input type="text" minlength="15" maxlength="16" class="form-control" id="cardNumber" formControlName="cardNumber" placeholder="Card Number">
           </div>
-          <div class="form-inline">
-            <div col="4" class="form-group">
-              <input type="text" maxlength="2" class="form-control credit-card-item" formControlName="expMonth" id="expMonth" placeholder="MM">
+          <div class="form-group">
+          <div class="card-exp-row">
+            <div class="form-group card-item">
+              <label for="expMonth">Exp Month</label>
+              <input type="text" minlength="1" maxlength="2" class="form-control credit-card-item" formControlName="expMonth" id="expMonth" placeholder="MM">
             </div>
-            <div col="4" class="form-group">
-              <input type="text" maxlength="2" class="form-control credit-card-item" formControlName="expYear" id="expYear" placeholder="YY">
+            <div class="form-group card-item">
+              <label for="expYear">Exp Year</label>
+              <input type="text" minlength="1" maxlength="2" class="form-control credit-card-item" formControlName="expYear" id="expYear" placeholder="YY">
             </div>
-            <div col="4" class="form-group">
-              <input type="text" maxlength="2" class="form-control credit-card-item" formControlName="cvv" id="cvv" placeholder="CVV">
+            <div class="form-group card-item">
+              <input type="text" minlength="3" maxlength="3" class="form-control credit-card-item" formControlName="cvv" id="cvv" placeholder="CVV">
             </div>
+          </div>
           </div>
           <button type="submit" [disabled]="!cForm.valid" class="btn btn-primary">Authenticate</button>
         </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<button type="button" class="btn btn-primary" (click)="showCardModal()">Render auto-shown modal</button>
+<!-- Sign Up Apply - Add Company Name And Annual Final -->
+<div *ngIf="isFinalModalShown" [config]="{ show: true }" (onHidden)="onFinalHidden()" bsModal #autoShownFinalModal="bs-modal"
+     class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">Sign Up - Annual Final</h4>
+      </div>
+      <div class="modal-body">
+        <img *ngIf="loggedUser.image" src="loggedUser.image" alt="Profile Image" class="img-rounded">
+        <div class="well">
+        <p class="text-uppercase">THANK YOU</p>
+        <h3>{{loggedUser.firstName}} {{loggedUser.lastName}}</h3>
+        <p [ngClass]="addCardResponseStatus===200?'text-success':'text-danger'">{{addCardResponseMessage}}</p>
+          <p *ngIf="addCardResponseStatus!==200" class="text-warning">Все норм, процедура прошла успешно</p>
+        </div>
+        <button class="btn btn-primary" (click)="hideFinalModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Sign Up Apply - Error Modal Window -->
+<div *ngIf="isErrorModalShown" [config]="{ show: true }" (onHidden)="onErrorHidden()" bsModal #autoShownErrorModal="bs-modal"
+     class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">Sign Up - Annual Error</h4>
+      </div>
+      <div class="modal-body">
+        <div class="well">
+          <h3 class="text-danger">Error!</h3>
+          <p class="text-danger">{{errorMessage}}</p>
+          <small class="text-warning">Ошибка соединения с сервером</small>
+        </div>
+        <button class="btn btn-primary" (click)="hideErrorModal()">Close</button>
       </div>
     </div>
   </div>
