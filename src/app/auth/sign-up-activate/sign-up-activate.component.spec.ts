@@ -10,7 +10,7 @@ describe('SignUpActivateComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ SignUpActivateComponent ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
